@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hit the Button — Quick-Fire Mental Maths</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .font-display {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+    }
+
+    body {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+
+    .bg-classroom-pattern {
+      background-color: #f1f5f9;
+      background-image: radial-gradient(#cbd5e1 1.25px, transparent 1.25px);
+      background-size: 24px 24px;
+    }
+
+    /* Tactile 3D Glossy Hit-the-Button Disc / Pill */
+    .htb-btn {
+      position: relative;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.1s ease, filter 0.15s ease;
+      text-shadow: 0 2px 3px rgba(0, 0, 0, 0.28);
+      overflow: hidden;
+    }
+
+    /* Glossy top specular highlight on each button */
+    .htb-btn::before {
+      content: '';
+      position: absolute;
+      top: 7%;
+      left: 14%;
+      right: 14%;
+      height: 36%;
+      border-radius: 9999px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.04) 100%);
+      pointer-events: none;
+    }
+
+    .htb-btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      filter: brightness(1.06);
+    }
+
+    .htb-btn:active {
+      transform: translateY(3px) scale(0.97);
+    }
+
+    /* Distinct vibrant classroom button themes */
+    .btn-theme-0 {
+      background: linear-gradient(180deg, #fb7185 0%, #e11d48 100%);
+      border: 3px solid #9f1239;
+      box-shadow: 0 6px 0 #9f1239, 0 10px 18px rgba(225, 29, 72, 0.25);
+    }
+    .btn-theme-0:active { box-shadow: 0 2px 0 #9f1239; }
+
+    .btn-theme-1 {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      border: 3px solid #075985;
+      box-shadow: 0 6px 0 #075985, 0 10px 18px rgba(2, 132, 199, 0.25);
+    }
+    .btn-theme-1:active { box-shadow: 0 2px 0 #075985; }
+
+    .btn-theme-2 {
+      background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+      border: 3px solid #065f46;
+      box-shadow: 0 6px 0 #065f46, 0 10px 18px rgba(5, 150, 105, 0.25);
+    }
+    .btn-theme-2:active { box-shadow: 0 2px 0 #065f46; }
+
+    .btn-theme-3 {
+      background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+      border: 3px solid #92400e;
+      box-shadow: 0 6px 0 #92400e, 0 10px 18px rgba(217, 119, 6, 0.25);
+    }
+    .btn-theme-3:active { box-shadow: 0 2px 0 #92400e; }
+
+    .btn-theme-4 {
+      background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%);
+      border: 3px solid #4c1d95;
+      box-shadow: 0 6px 0 #4c1d95, 0 10px 18px rgba(124, 58, 237, 0.25);
+    }
+    .btn-theme-4:active { box-shadow: 0 2px 0 #4c1d95; }
+
+    .btn-theme-5 {
+      background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+      border: 3px solid #9a3412;
+      box-shadow: 0 6px 0 #9a3412, 0 10px 18px rgba(234, 88, 12, 0.25);
+    }
+    .btn-theme-5:active { box-shadow: 0 2px 0 #9a3412; }
+
+    /* Correct Hit Ripple & Pop */
+    @keyframes hitSuccess {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.16); box-shadow: 0 0 0 12px rgba(16, 185, 129, 0.45); }
+      100% { transform: scale(1); }
+    }
+    .animate-hit-correct {
+      animation: hitSuccess 0.34s ease-out;
+      background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
+      border-color: #14532d !important;
+    }
+
+    /* Wrong Hit Shake */
+    @keyframes hitShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+    .animate-hit-wrong {
+      animation: hitShake 0.34s ease-in-out;
+      background: linear-gradient(180deg, #f87171 0%, #b91c1c 100%) !important;
+      border-color: #7f1d1d !important;
+    }
+
+    /* Floating +1 / Combo Score Badge */
+    @keyframes floatScore {
+      0% { transform: translate(-50%, 0) scale(0.75); opacity: 1; }
+      100% { transform: translate(-50%, -48px) scale(1.2); opacity: 0; }
+    }
+    .floating-score {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      animation: floatScore 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Final 10-second timer urgency pulse */
+    @keyframes urgentPulse {
+      0%, 100% { transform: scale(1); background-color: #dc2626; }
+      50% { transform: scale(1.06); background-color: #ef4444; }
+    }
+    .timer-urgent {
+      animation: urgentPulse 0.75s infinite ease-in-out;
+    }
+
+    /* Target card transition */
+    @keyframes targetPop {
+      0% { transform: scale(0.92); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-target-pop {
+      animation: targetPop 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-classroom-pattern">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-[1560px] mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5">
+      
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="goToHome()">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-b from-rose-400 to-rose-600 border-2 border-white/80 flex items-center justify-center shadow-md">
+          <span class="font-display text-white text-lg font-bold tracking-tight">HIT</span>
+        </div>
+        <div>
+          <h1 class="font-display text-lg sm:text-xl font-bold tracking-tight leading-none">
+            Hit the <span class="text-amber-400">Button</span>
+          </h1>
+          <p class="text-[11px] font-bold text-slate-400 hidden sm:block">
+            Quick-Fire Mental Maths Challenge
+          </p>
+        </div>
+      </div>
+
+      <!-- Active Gameplay HUD -->
+      <div id="playHud" class="hidden flex-wrap items-center gap-2 sm:gap-3">
+        <!-- Countdown / Stopwatch Pill -->
+        <div id="hudTimerPill" class="px-3.5 py-1.5 rounded-full bg-slate-800 border border-slate-700 flex items-center gap-2">
+          <span id="hudTimerIcon" class="text-sm">⏱️</span>
+          <span id="hudTimerVal" class="font-display text-base sm:text-lg font-bold tabular-nums">60s</span>
+        </div>
+
+        <!-- Score Pill -->
+        <div class="px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 flex items-center gap-1.5">
+          <span class="text-xs font-extrabold uppercase tracking-wider">Score:</span>
+          <span id="hudScoreVal" class="font-display text-base sm:text-lg font-bold text-white tabular-nums">0</span>
+        </div>
+
+        <!-- Streak / Combo Pill -->
+        <div id="hudStreakPill" class="px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 flex items-center gap-1.5 transition-all">
+          <span class="text-sm">🔥</span>
+          <span id="hudStreakVal" class="font-display text-sm sm:text-base font-bold text-white tabular-nums">0</span>
+          <span id="hudComboBadge" class="hidden ml-1 px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] uppercase">
+            3x Streak!
+          </span>
+        </div>
+      </div>
+
+      <!-- Global Right Controls: Duration Mode, Sound & Navigation -->
+      <div class="flex items-center gap-2">
+        <!-- Duration Toggle Pill (Visible on Home / Submenu) -->
+        <div id="durationSelectorGroup" class="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700">
+          <button
+            id="btnDur-timed"
+            onclick="setDurationMode('timed')"
+            class="px-2.5 py-1 rounded-lg text-xs font-extrabold transition bg-amber-400 text-slate-950"
+          >
+            ⏱️ 1 Min Timed
+          </button>
+          <button
+            id="btnDur-untimed"
+            onclick="setDurationMode('untimed')"
+            class="px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-300 hover:text-white"
+          >
+            🎯 20Q Practice
+          </button>
+        </div>
+
+        <!-- Sound Toggle -->
+        <button
+          onclick="toggleSound()"
+          title="Toggle Sound Effects"
+          class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition"
+        >
+          <svg id="iconSoundOn" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+          </svg>
+          <svg id="iconSoundOff" class="w-4 h-4 hidden text-slate-500" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+          </svg>
+        </button>
+
+        <!-- Back / Main Menu Button -->
+        <button
+          id="btnHomeNav"
+          onclick="goToHome()"
+          class="hidden px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-extrabold text-slate-200 transition"
+        >
+          🏠 Menu
+        </button>
+      </div>
+    </div>
+
+    <!-- Countdown / Progress Bar -->
+    <div id="topProgressTrack" class="hidden w-full h-2 bg-slate-800 overflow-hidden">
+      <div id="topProgressFill" class="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-200" style="width: 100%;"></div>
+    </div>
+  </header>
+
+  <!-- MAIN APPLICATION CONTAINER -->
+  <main class="flex-1 flex flex-col max-w-[1440px] w-full mx-auto px-3 sm:px-6 py-5">
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 1: MAIN CATEGORY SELECTION SCREEN                                -->
+    <!-- ===================================================================== -->
+    <section id="viewCategories" class="my-auto w-full max-w-5xl mx-auto flex flex-col gap-6">
+      <div class="text-center">
+        <h2 class="font-display text-2xl sm:text-4xl font-bold text-slate-800 tracking-tight">
+          Choose a Maths Topic
+        </h2>
+        <p class="text-slate-500 text-sm sm:text-base font-bold mt-1">
+          Select a category below, pick your level, and hit the right buttons as fast as you can!
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        
+        <!-- 1. Number Bonds -->
+        <button
+          onclick="openCategory('bonds')"
+          class="group bg-white hover:bg-rose-50/60 rounded-3xl border-2 border-slate-200 hover:border-rose-400 p-5 sm:p-6 text-left shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-4 cursor-pointer active:scale-[0.98]"
+        >
+          <div class="flex items-start justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white font-display text-2xl font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
+              10
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 text-[11px] font-black uppercase">
+              5 Levels
+            </span>
+          </div>
+          <div>
+            <h3 class="font-display text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-rose-700 transition">
+              Number Bonds
+            </h3>
+            <p class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+              Make 10, Make 20, Make 100 (tens &amp; any), and Make 1 with decimals.
+            </p>
+          </div>
+        </button>
+
+        <!-- 2. Doubles -->
+        <button
+          onclick="openCategory('doubles')"
+          class="group bg-white hover:bg-sky-50/60 rounded-3xl border-2 border-slate-200 hover:border-sky-400 p-5 sm:p-6 text-left shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-4 cursor-pointer active:scale-[0.98]"
+        >
+          <div class="flex items-start justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 text-white font-display text-2xl font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
+              ×2
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 text-[11px] font-black uppercase">
+              6 Levels
+            </span>
+          </div>
+          <div>
+            <h3 class="font-display text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-sky-700 transition">
+              Doubles
+            </h3>
+            <p class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+              Doubles to 10, 20, 50, 100, multiples of 10, and 1-decimal-place numbers.
+            </p>
+          </div>
+        </button>
+
+        <!-- 3. Halves -->
+        <button
+          onclick="openCategory('halves')"
+          class="group bg-white hover:bg-emerald-50/60 rounded-3xl border-2 border-slate-200 hover:border-emerald-400 p-5 sm:p-6 text-left shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-4 cursor-pointer active:scale-[0.98]"
+        >
+          <div class="flex items-start justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-display text-2xl font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
+              ÷2
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black uppercase">
+              6 Levels
+            </span>
+          </div>
+          <div>
+            <h3 class="font-display text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-emerald-700 transition">
+              Halves
+            </h3>
+            <p class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+              Halves from 10, 20, 50, 100, multiples of 10, and decimal halves.
+            </p>
+          </div>
+        </button>
+
+        <!-- 4. Times Tables -->
+        <button
+          onclick="openCategory('tables')"
+          class="group bg-white hover:bg-amber-50/60 rounded-3xl border-2 border-slate-200 hover:border-amber-400 p-5 sm:p-6 text-left shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-4 cursor-pointer active:scale-[0.98]"
+        >
+          <div class="flex items-start justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white font-display text-2xl font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
+              ×
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black uppercase">
+              Answer &amp; Question
+            </span>
+          </div>
+          <div>
+            <h3 class="font-display text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-amber-700 transition">
+              Times Tables
+            </h3>
+            <p class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+              Individual tables ×2 to ×12 or Mixed sets in Hit the Answer &amp; Hit the Question modes.
+            </p>
+          </div>
+        </button>
+
+        <!-- 5. Division Facts -->
+        <button
+          onclick="openCategory('division')"
+          class="group bg-white hover:bg-purple-50/60 rounded-3xl border-2 border-slate-200 hover:border-purple-400 p-5 sm:p-6 text-left shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-4 cursor-pointer active:scale-[0.98]"
+        >
+          <div class="flex items-start justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white font-display text-2xl font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
+              ÷
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 text-[11px] font-black uppercase">
+              Answer &amp; Question
+            </span>
+          </div>
+          <div>
+            <h3 class="font-display text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-purple-700 transition">
+              Division Facts
+            </h3>
+            <p class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+              Divide by 2 through 12 or Mixed sets in Hit the Answer &amp; Hit the Question modes.
+            </p>
+          </div>
+        </button>
+
+        <!-- 6. Square Numbers -->
+        <button
+          onclick="openCategory('squares')"
+          class="group bg-white hover:bg-orange-50/60 rounded-3xl border-2 border-slate-200 hover:border-orange-400 p-5 sm:p-6 text-left shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-4 cursor-pointer active:scale-[0.98]"
+        >
+          <div class="flex items-start justify-between">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 text-white font-display text-2xl font-bold flex items-center justify-center shadow-sm group-hover:scale-105 transition">
+              n²
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-orange-100 text-orange-800 text-[11px] font-black uppercase">
+              3 Levels
+            </span>
+          </div>
+          <div>
+            <h3 class="font-display text-xl sm:text-2xl font-bold text-slate-800 group-hover:text-orange-700 transition">
+              Square Numbers
+            </h3>
+            <p class="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+              Squares up to 10², Squares up to 12², and Square Roots up to √144.
+            </p>
+          </div>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 2: SUB-MODE SELECTION SCREEN                                     -->
+    <!-- ===================================================================== -->
+    <section id="viewSubmodes" class="hidden my-auto w-full max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-8 flex flex-col gap-5">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div class="flex items-center gap-3">
+          <button
+            onclick="goToHome()"
+            class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs transition"
+          >
+            ← Back
+          </button>
+          <div>
+            <h2 id="subCategoryTitle" class="font-display text-2xl sm:text-3xl font-bold text-slate-800">
+              Times Tables
+            </h2>
+            <p id="subCategoryDesc" class="text-xs sm:text-sm font-semibold text-slate-500">
+              Select a level to start playing immediately
+            </p>
+          </div>
+        </div>
+
+        <!-- Hit the Answer vs Hit the Question Toggle (for Times Tables & Division) -->
+        <div id="questionStyleToggle" class="hidden items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button
+            id="btnQStyle-answer"
+            onclick="setQuestionStyle('answer')"
+            class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-slate-900 text-white shadow-2xs"
+          >
+            Hit the Answer
+          </button>
+          <button
+            id="btnQStyle-question"
+            onclick="setQuestionStyle('question')"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900"
+          >
+            Hit the Question
+          </button>
+        </div>
+      </div>
+
+      <!-- Sub-mode Grid -->
+      <div id="submodeGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <!-- Submode buttons rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 3: ACTIVE "HIT THE BUTTON" GAME ARENA                            -->
+    <!-- ===================================================================== -->
+    <section id="viewGame" class="hidden flex-1 flex flex-col justify-between max-w-5xl w-full mx-auto gap-4">
+      
+      <!-- Top Mode Breadcrumb & Personal Best Strip -->
+      <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+        <div class="flex items-center gap-2">
+          <span id="activeModeBadge" class="px-3 py-1 rounded-full bg-slate-800 text-white text-xs font-extrabold">
+            Number Bonds • Make 20
+          </span>
+          <span id="activeStyleBadge" class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 text-xs font-extrabold">
+            Hit the Answer
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs font-extrabold text-slate-500">
+          <span>🏆 Personal Best:</span>
+          <span id="activePbBadge" class="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-slate-800 tabular-nums">
+            0
+          </span>
+        </div>
+      </div>
+
+      <!-- CENTRAL TARGET PROMPT DISPLAY -->
+      <div class="bg-white rounded-3xl border-2 border-slate-200 shadow-sm px-5 py-5 sm:py-6 text-center relative overflow-hidden">
+        <div id="targetSubLabel" class="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 mb-1">
+          Find the missing number
+        </div>
+        <div
+          id="targetPromptDisplay"
+          class="font-display text-4xl sm:text-6xl font-bold text-slate-900 tracking-tight animate-target-pop"
+        >
+          13 + ? = 20
+        </div>
+      </div>
+
+      <!-- CIRCULAR / PILL ANSWER BUTTONS BOARD (12 Tactile Glossy Buttons) -->
+      <div class="flex-1 bg-white/80 rounded-3xl border border-slate-200/90 shadow-inner p-4 sm:p-6 flex items-center justify-center">
+        <div
+          id="buttonsBoardGrid"
+          class="w-full max-w-4xl grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-5 place-items-center"
+        >
+          <!-- 12 Tactile Buttons injected dynamically here -->
+        </div>
+      </div>
+
+      <!-- Bottom Keyboard Shortcut Hint -->
+      <div class="text-center text-xs font-bold text-slate-400">
+        Click or tap the matching button • Desktop shortcut: keys <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded text-slate-600">1–9</kbd>, <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded text-slate-600">0</kbd>, <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded text-slate-600">-</kbd>, <kbd class="px-1.5 py-0.5 bg-white border border-slate-300 rounded text-slate-600">=</kbd>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 4: END-OF-ROUND RESULTS & HIGH SCORE SUMMARY                     -->
+    <!-- ===================================================================== -->
+    <section id="viewResults" class="hidden my-auto w-full max-w-3xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8 flex flex-col gap-6">
+      
+      <div class="text-center">
+        <div id="resNewRecordBanner" class="hidden inline-block px-3.5 py-1 rounded-full bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider mb-2 animate-bounce">
+          🎉 New Personal Best!
+        </div>
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-slate-800">
+          Time's Up!
+        </h2>
+        <p id="resModeSummary" class="text-slate-500 font-bold text-sm mt-1">
+          Number Bonds • Make 20
+        </p>
+      </div>
+
+      <!-- 4 Key Score Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-3.5 text-center">
+          <div class="text-[11px] font-black uppercase tracking-wider text-emerald-600">Final Score</div>
+          <div id="resScore" class="font-display text-3xl font-bold text-emerald-950 mt-0.5 tabular-nums">0</div>
+        </div>
+        <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-3.5 text-center">
+          <div class="text-[11px] font-black uppercase tracking-wider text-sky-600">Accuracy</div>
+          <div id="resAccuracy" class="font-display text-3xl font-bold text-sky-950 mt-0.5 tabular-nums">100%</div>
+        </div>
+        <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3.5 text-center">
+          <div class="text-[11px] font-black uppercase tracking-wider text-amber-600">Best Streak</div>
+          <div id="resStreak" class="font-display text-3xl font-bold text-amber-950 mt-0.5 tabular-nums">0 🔥</div>
+        </div>
+        <div class="bg-purple-50 border-2 border-purple-200 rounded-2xl p-3.5 text-center">
+          <div class="text-[11px] font-black uppercase tracking-wider text-purple-600">Personal Best</div>
+          <div id="resPersonalBest" class="font-display text-3xl font-bold text-purple-950 mt-0.5 tabular-nums">0 🏆</div>
+        </div>
+      </div>
+
+      <div class="text-center text-xs font-extrabold text-slate-500">
+        Speed: <span id="resQpm" class="text-slate-800">0</span> correct hits per minute
+      </div>
+
+      <!-- Expandable Review Mistakes Section -->
+      <div id="mistakesWrapper" class="hidden flex-col gap-2">
+        <button
+          onclick="toggleMistakesList()"
+          class="w-full px-4 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 font-extrabold text-xs sm:text-sm flex items-center justify-between transition cursor-pointer"
+        >
+          <span id="mistakesToggleLabel">Review Mistakes (0)</span>
+          <span id="mistakesChevron">▼</span>
+        </button>
+        <div id="mistakesListContainer" class="hidden max-h-48 overflow-y-auto flex-col gap-2 pt-1 pr-1">
+          <!-- Missed items injected here -->
+        </div>
+      </div>
+
+      <!-- Replay & Menu Action Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
+        <button
+          onclick="startRound()"
+          class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-display text-xl font-bold shadow-lg shadow-emerald-600/20 transition active:scale-95 cursor-pointer"
+        >
+          Play Again 🔄
+        </button>
+        <button
+          onclick="openCategory(state.category)"
+          class="px-5 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-sm border border-slate-200 transition cursor-pointer"
+        >
+          Change Level
+        </button>
+        <button
+          onclick="goToHome()"
+          class="px-5 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-sm border border-slate-200 transition cursor-pointer"
+        >
+          All Topics
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /**
+     * ============================================================================
+     * CURRICULUM CATEGORIES & SUB-MODES CONFIGURATION
+     * ============================================================================
+     */
+    const CATEGORIES = {
+      bonds: {
+        id: 'bonds',
+        title: 'Number Bonds',
+        desc: 'Find the missing partner to make the target total.',
+        supportsQuestionStyle: false,
+        submodes: [
+          { id: 'make10', label: 'Make 10', badge: 'Up to 10' },
+          { id: 'make20', label: 'Make 20', badge: 'Up to 20' },
+          { id: 'make100_tens', label: 'Make 100 (Tens)', badge: 'Multiples of 10' },
+          { id: 'make100_any', label: 'Make 100 (Any)', badge: '2-Digit Bonds' },
+          { id: 'make1_dec', label: 'Make 1 (Decimals)', badge: '1 Decimal Place' }
+        ]
+      },
+      doubles: {
+        id: 'doubles',
+        title: 'Doubles',
+        desc: 'Quickly double whole numbers, multiples of 10, and decimals.',
+        supportsQuestionStyle: false,
+        submodes: [
+          { id: 'dbl_10', label: 'Doubles to 10', badge: '1 to 10' },
+          { id: 'dbl_20', label: 'Doubles to 20', badge: '1 to 20' },
+          { id: 'dbl_50', label: 'Doubles to 50', badge: '1 to 50' },
+          { id: 'dbl_100', label: 'Doubles to 100', badge: '1 to 100' },
+          { id: 'dbl_tens', label: 'Multiples of 10', badge: '10 to 500' },
+          { id: 'dbl_dec', label: 'Doubles (Decimals)', badge: '1 Decimal Place' }
+        ]
+      },
+      halves: {
+        id: 'halves',
+        title: 'Halves',
+        desc: 'Find half of even numbers, multiples of 10, and decimals.',
+        supportsQuestionStyle: false,
+        submodes: [
+          { id: 'hlf_10', label: 'Halves from 10', badge: 'Even to 10' },
+          { id: 'hlf_20', label: 'Halves from 20', badge: 'Even to 20' },
+          { id: 'hlf_50', label: 'Halves from 50', badge: 'Even to 50' },
+          { id: 'hlf_100', label: 'Halves from 100', badge: 'Even to 100' },
+          { id: 'hlf_tens', label: 'Multiples of 10', badge: '20 to 1000' },
+          { id: 'hlf_dec', label: 'Halves (Decimals)', badge: '1 Decimal Place' }
+        ]
+      },
+      tables: {
+        id: 'tables',
+        title: 'Times Tables',
+        desc: 'Practice individual multiplication tables or mixed sets.',
+        supportsQuestionStyle: true,
+        submodes: [
+          { id: 'x2', label: '×2 Table', badge: '2s' },
+          { id: 'x3', label: '×3 Table', badge: '3s' },
+          { id: 'x4', label: '×4 Table', badge: '4s' },
+          { id: 'x5', label: '×5 Table', badge: '5s' },
+          { id: 'x6', label: '×6 Table', badge: '6s' },
+          { id: 'x7', label: '×7 Table', badge: '7s' },
+          { id: 'x8', label: '×8 Table', badge: '8s' },
+          { id: 'x9', label: '×9 Table', badge: '9s' },
+          { id: 'x10', label: '×10 Table', badge: '10s' },
+          { id: 'x11', label: '×11 Table', badge: '11s' },
+          { id: 'x12', label: '×12 Table', badge: '12s' },
+          { id: 'x_mix_2_5_10', label: 'Mixed (×2, ×5, ×10)', badge: 'KS1 Focus' },
+          { id: 'x_mix_3_4_8', label: 'Mixed (×3, ×4, ×8)', badge: 'Lower KS2' },
+          { id: 'x_mix_all', label: 'Mixed (Up to ×12)', badge: 'Full MTC' }
+        ]
+      },
+      division: {
+        id: 'division',
+        title: 'Division Facts',
+        desc: 'Recall division facts for individual tables or mixed sets.',
+        supportsQuestionStyle: true,
+        submodes: [
+          { id: 'd2', label: '÷2 Facts', badge: 'By 2' },
+          { id: 'd3', label: '÷3 Facts', badge: 'By 3' },
+          { id: 'd4', label: '÷4 Facts', badge: 'By 4' },
+          { id: 'd5', label: '÷5 Facts', badge: 'By 5' },
+          { id: 'd6', label: '÷6 Facts', badge: 'By 6' },
+          { id: 'd7', label: '÷7 Facts', badge: 'By 7' },
+          { id: 'd8', label: '÷8 Facts', badge: 'By 8' },
+          { id: 'd9', label: '÷9 Facts', badge: 'By 9' },
+          { id: 'd10', label: '÷10 Facts', badge: 'By 10' },
+          { id: 'd11', label: '÷11 Facts', badge: 'By 11' },
+          { id: 'd12', label: '÷12 Facts', badge: 'By 12' },
+          { id: 'd_mix_2_5_10', label: 'Mixed (÷2, ÷5, ÷10)', badge: 'KS1 Focus' },
+          { id: 'd_mix_3_4_8', label: 'Mixed (÷3, ÷4, ÷8)', badge: 'Lower KS2' },
+          { id: 'd_mix_all', label: 'Mixed (Up to ÷12)', badge: 'All Tables' }
+        ]
+      },
+      squares: {
+        id: 'squares',
+        title: 'Square Numbers',
+        desc: 'Square numbers up to 12² and square roots up to √144.',
+        supportsQuestionStyle: false,
+        submodes: [
+          { id: 'sq_10', label: 'Squares up to 10²', badge: '1² to 10²' },
+          { id: 'sq_12', label: 'Squares up to 12²', badge: '1² to 12²' },
+          { id: 'sqrt_144', label: 'Square Roots (√144)', badge: '√1 to √144' }
+        ]
+      }
+    };
+
+    const BUTTON_COUNT = 12;
+    const KEYBOARD_MAP = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
+
+    /**
+     * ============================================================================
+     * APPLICATION STATE
+     * ============================================================================
+     */
+    const state = {
+      view: 'categories', // 'categories' | 'submodes' | 'game' | 'results'
+      durationMode: 'timed', // 'timed' (60s) | 'untimed' (20Q practice)
+      category: 'bonds',
+      submode: 'make10',
+      questionStyle: 'answer', // 'answer' | 'question'
+      soundEnabled: true,
+
+      // Round metrics
+      score: 0,
+      totalClicks: 0,
+      streak: 0,
+      bestStreak: 0,
+      timeLeft: 60,
+      elapsedSeconds: 0,
+      timerInterval: null,
+      mistakes: [],
+
+      // Active Question
+      currentPrompt: '',
+      currentSubLabel: '',
+      correctAnswer: '',
+      boardOptions: [], // Array of 12 strings/numbers
+      lastPromptKey: '',
+      transitioning: false
+    };
+
+    /**
+     * ============================================================================
+     * WEB AUDIO API SOUND EFFECTS
+     * ============================================================================
+     */
+    let audioCtx = null;
+
+    function playSound(type) {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(540, now);
+          osc.frequency.exponentialRampToValueAtTime(720, now + 0.05);
+          gain.gain.setValueAtTime(0.11, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } else if (type === 'correct') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          // Pitch rises subtly with streak for tactile excitement
+          const pitchBoost = Math.min(state.streak * 18, 220);
+          osc.frequency.setValueAtTime(523.25 + pitchBoost, now);
+          osc.frequency.setValueAtTime(783.99 + pitchBoost, now + 0.065);
+          gain.gain.setValueAtTime(0.16, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        } else if (type === 'wrong') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(195, now);
+          osc.frequency.linearRampToValueAtTime(135, now + 0.18);
+          gain.gain.setValueAtTime(0.13, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } else if (type === 'tick') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(920, now);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (type === 'fanfare') {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((freq, idx) => {
+            const t = now + idx * 0.09;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0.15, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.29);
+          });
+        }
+      } catch (e) {
+        // Ignore if blocked by browser autoplay policy
+      }
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      document.getElementById('iconSoundOn').classList.toggle('hidden', !state.soundEnabled);
+      document.getElementById('iconSoundOff').classList.toggle('hidden', state.soundEnabled);
+      if (state.soundEnabled) playSound('click');
+    }
+
+    /**
+     * ============================================================================
+     * LOCAL STORAGE PERSONAL BEST HELPERS
+     * ============================================================================
+     */
+    function getPbStorageKey() {
+      return `htb_pb_${state.category}_${state.submode}_${state.questionStyle}_${state.durationMode}`;
+    }
+
+    function loadPersonalBest() {
+      try {
+        const val = localStorage.getItem(getPbStorageKey());
+        return val ? parseInt(val, 10) : 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function savePersonalBest(score) {
+      try {
+        const prev = loadPersonalBest();
+        if (score > prev) {
+          localStorage.setItem(getPbStorageKey(), String(score));
+          return true;
+        }
+      } catch (e) {
+        // Ignore storage errors
+      }
+      return false;
+    }
+
+    /**
+     * ============================================================================
+     * NAVIGATION & CONFIGURATION HANDLERS
+     * ============================================================================
+     */
+    function switchView(viewName) {
+      state.view = viewName;
+      document.getElementById('viewCategories').classList.toggle('hidden', viewName !== 'categories');
+      document.getElementById('viewSubmodes').classList.toggle('hidden', viewName !== 'submodes');
+      document.getElementById('viewGame').classList.toggle('hidden', viewName !== 'game');
+      document.getElementById('viewResults').classList.toggle('hidden', viewName !== 'results');
+
+      const inGame = viewName === 'game';
+      document.getElementById('playHud').classList.toggle('hidden', !inGame);
+      document.getElementById('playHud').classList.toggle('flex', inGame);
+      document.getElementById('durationSelectorGroup').classList.toggle('hidden', inGame);
+      document.getElementById('btnHomeNav').classList.toggle('hidden', viewName === 'categories');
+      document.getElementById('topProgressTrack').classList.toggle('hidden', !inGame);
+    }
+
+    function goToHome() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+      switchView('categories');
+    }
+
+    function setDurationMode(mode) {
+      state.durationMode = mode;
+      const btnT = document.getElementById('btnDur-timed');
+      const btnU = document.getElementById('btnDur-untimed');
+      if (mode === 'timed') {
+        btnT.className = 'px-2.5 py-1 rounded-lg text-xs font-extrabold transition bg-amber-400 text-slate-950';
+        btnU.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-300 hover:text-white';
+      } else {
+        btnU.className = 'px-2.5 py-1 rounded-lg text-xs font-extrabold transition bg-amber-400 text-slate-950';
+        btnT.className = 'px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-300 hover:text-white';
+      }
+      playSound('click');
+    }
+
+    function setQuestionStyle(style) {
+      state.questionStyle = style;
+      const btnA = document.getElementById('btnQStyle-answer');
+      const btnQ = document.getElementById('btnQStyle-question');
+      if (style === 'answer') {
+        btnA.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-slate-900 text-white shadow-2xs';
+        btnQ.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900';
+      } else {
+        btnQ.className = 'px-3 py-1.5 rounded-lg text-xs font-extrabold transition bg-slate-900 text-white shadow-2xs';
+        btnA.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900';
+      }
+      playSound('click');
+    }
+
+    function openCategory(catId) {
+      state.category = catId;
+      const cat = CATEGORIES[catId];
+      if (!cat) return;
+
+      if (!cat.supportsQuestionStyle) {
+        state.questionStyle = 'answer';
+      }
+
+      document.getElementById('subCategoryTitle').textContent = cat.title;
+      document.getElementById('subCategoryDesc').textContent = cat.desc;
+
+      const styleToggle = document.getElementById('questionStyleToggle');
+      styleToggle.classList.toggle('hidden', !cat.supportsQuestionStyle);
+      styleToggle.classList.toggle('flex', cat.supportsQuestionStyle);
+
+      const grid = document.getElementById('submodeGrid');
+      grid.innerHTML = '';
+
+      cat.submodes.forEach((sub, idx) => {
+        const themeIdx = idx % 6;
+        const btn = document.createElement('button');
+        btn.className = 'group p-4 rounded-2xl bg-slate-50 hover:bg-white border-2 border-slate-200 hover:border-slate-900 text-left transition-all flex items-center justify-between gap-2 shadow-2xs hover:shadow-md cursor-pointer active:scale-[0.98]';
+        btn.innerHTML = `
+          <div>
+            <div class="font-display text-base sm:text-lg font-bold text-slate-800 group-hover:text-slate-950">
+              ${sub.label}
+            </div>
+            <div class="text-[11px] font-extrabold text-slate-400 mt-0.5">
+              ${sub.badge}
+            </div>
+          </div>
+          <div class="w-9 h-9 rounded-full btn-theme-${themeIdx} flex items-center justify-center text-white font-black text-sm shrink-0">
+            ▶
+          </div>
+        `;
+        btn.onclick = () => {
+          state.submode = sub.id;
+          startRound();
+        };
+        grid.appendChild(btn);
+      });
+
+      playSound('click');
+      switchView('submodes');
+    }
+
+    /**
+     * ============================================================================
+     * QUESTION & DISTRACTOR ENGINE FOR ALL 6 CATEGORIES
+     * ============================================================================
+     */
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function formatDecimal(num) {
+      return Number(num.toFixed(1)).toString();
+    }
+
+    function generateQuestionData() {
+      const { category, submode, questionStyle } = state;
+
+      // 1. NUMBER BONDS
+      if (category === 'bonds') {
+        if (submode === 'make10') {
+          const a = randInt(0, 10);
+          const ans = 10 - a;
+          return {
+            subLabel: 'Make 10',
+            prompt: `${a} + ? = 10`,
+            correct: String(ans),
+            pool: Array.from({ length: 12 }, (_, i) => String(i)) // 0..11
+          };
+        }
+        if (submode === 'make20') {
+          const a = randInt(1, 19);
+          const ans = 20 - a;
+          const set = new Set([ans]);
+          while (set.size < BUTTON_COUNT) set.add(randInt(0, 20));
+          return {
+            subLabel: 'Make 20',
+            prompt: `${a} + ? = 20`,
+            correct: String(ans),
+            pool: Array.from(set).map(String)
+          };
+        }
+        if (submode === 'make100_tens') {
+          const a = randInt(1, 9) * 10;
+          const ans = 100 - a;
+          const pool = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110].map(String);
+          return {
+            subLabel: 'Make 100 (Tens)',
+            prompt: `${a} + ? = 100`,
+            correct: String(ans),
+            pool
+          };
+        }
+        if (submode === 'make100_any') {
+          const a = randInt(11, 89);
+          const ans = 100 - a;
+          const set = new Set([ans]);
+          // Classic pupil error: tens digits summing to 100 instead of 90 (e.g. 100 - 34 -> 76)
+          const trap = (10 - Math.floor(a / 10)) * 10 + ((10 - (a % 10)) % 10);
+          if (trap > 0 && trap < 100) set.add(trap);
+          while (set.size < BUTTON_COUNT) {
+            const cand = ans + randInt(-15, 15);
+            if (cand > 0 && cand < 100) set.add(cand);
+          }
+          return {
+            subLabel: 'Make 100',
+            prompt: `${a} + ? = 100`,
+            correct: String(ans),
+            pool: Array.from(set).map(String)
+          };
+        }
+        if (submode === 'make1_dec') {
+          const tenths = randInt(1, 9);
+          const a = formatDecimal(tenths / 10);
+          const ans = formatDecimal((10 - tenths) / 10);
+          const pool = ['0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0', '0.0', '1.1'];
+          return {
+            subLabel: 'Make 1 (Decimals)',
+            prompt: `${a} + ? = 1`,
+            correct: ans,
+            pool
+          };
+        }
+      }
+
+      // 2. DOUBLES
+      if (category === 'doubles') {
+        if (submode === 'dbl_dec') {
+          const tenths = randInt(1, 49);
+          const n = formatDecimal(tenths / 10);
+          const ans = formatDecimal((tenths * 2) / 10);
+          const set = new Set([ans]);
+          while (set.size < BUTTON_COUNT) {
+            const delta = randInt(-12, 12) / 10;
+            const cand = Number(((tenths * 2) / 10 + delta).toFixed(1));
+            if (cand > 0) set.add(formatDecimal(cand));
+          }
+          return {
+            subLabel: 'Double the Decimal',
+            prompt: `Double ${n}`,
+            correct: ans,
+            pool: Array.from(set)
+          };
+        }
+
+        let n = 1;
+        if (submode === 'dbl_10') n = randInt(1, 10);
+        else if (submode === 'dbl_20') n = randInt(2, 20);
+        else if (submode === 'dbl_50') n = randInt(11, 50);
+        else if (submode === 'dbl_100') n = randInt(21, 100);
+        else if (submode === 'dbl_tens') n = randInt(1, 50) * 10;
+
+        const ans = n * 2;
+        const step = submode === 'dbl_tens' ? 10 : 1;
+        const set = new Set([ans]);
+        while (set.size < BUTTON_COUNT) {
+          const offset = randInt(-8, 8) * step;
+          const cand = ans + offset;
+          if (cand > 0) set.add(cand);
+        }
+        return {
+          subLabel: 'Double the Number',
+          prompt: `Double ${n}`,
+          correct: String(ans),
+          pool: Array.from(set).map(String)
+        };
+      }
+
+      // 3. HALVES
+      if (category === 'halves') {
+        if (submode === 'hlf_dec') {
+          // Even tenths so half is a clean 1-decimal-place number
+          const evenTenths = randInt(1, 49) * 2;
+          const n = formatDecimal(evenTenths / 10);
+          const ans = formatDecimal((evenTenths / 2) / 10);
+          const set = new Set([ans]);
+          while (set.size < BUTTON_COUNT) {
+            const delta = randInt(-10, 10) / 10;
+            const cand = Number(((evenTenths / 2) / 10 + delta).toFixed(1));
+            if (cand > 0) set.add(formatDecimal(cand));
+          }
+          return {
+            subLabel: 'Half of Decimal',
+            prompt: `Half of ${n}`,
+            correct: ans,
+            pool: Array.from(set)
+          };
+        }
+
+        let half = 1;
+        if (submode === 'hlf_10') half = randInt(1, 5);
+        else if (submode === 'hlf_20') half = randInt(1, 10);
+        else if (submode === 'hlf_50') half = randInt(6, 25);
+        else if (submode === 'hlf_100') half = randInt(11, 50);
+        else if (submode === 'hlf_tens') half = randInt(1, 50) * 10;
+
+        const n = half * 2;
+        const step = submode === 'hlf_tens' ? 10 : 1;
+        const set = new Set([half]);
+        while (set.size < BUTTON_COUNT) {
+          const offset = randInt(-7, 7) * step;
+          const cand = half + offset;
+          if (cand > 0) set.add(cand);
+        }
+        return {
+          subLabel: 'Find Half',
+          prompt: `Half of ${n}`,
+          correct: String(half),
+          pool: Array.from(set).map(String)
+        };
+      }
+
+      // 4. TIMES TABLES
+      if (category === 'tables') {
+        const tableList = getTableNumbers(submode);
+        const t = tableList[randInt(0, tableList.length - 1)];
+        const m = randInt(1, 12);
+        const product = t * m;
+
+        if (questionStyle === 'answer') {
+          const set = new Set([product]);
+          // Include nearby multiples of t as smart distractors
+          for (let k = 1; k <= 12 && set.size < BUTTON_COUNT; k++) {
+            set.add(t * k);
+          }
+          while (set.size < BUTTON_COUNT) {
+            set.add(randInt(2, 144));
+          }
+          return {
+            subLabel: 'Hit the Answer',
+            prompt: `${m} × ${t} = ?`,
+            correct: String(product),
+            pool: Array.from(set).map(String)
+          };
+        } else {
+          // Hit the Question mode: Target is product, buttons are expressions like "7 × 8"
+          const correctExpr = `${m} × ${t}`;
+          const exprSet = new Set([correctExpr]);
+          while (exprSet.size < BUTTON_COUNT) {
+            const a = randInt(1, 12);
+            const b = tableList[randInt(0, tableList.length - 1)];
+            if (a * b !== product) {
+              exprSet.add(`${a} × ${b}`);
+            }
+          }
+          return {
+            subLabel: 'Hit the Matching Question',
+            prompt: `${product}`,
+            correct: correctExpr,
+            pool: Array.from(exprSet)
+          };
+        }
+      }
+
+      // 5. DIVISION FACTS
+      if (category === 'division') {
+        const divList = getTableNumbers(submode);
+        const divisor = divList[randInt(0, divList.length - 1)];
+        const quotient = randInt(1, 12);
+        const dividend = divisor * quotient;
+
+        if (questionStyle === 'answer') {
+          const pool = Array.from({ length: 12 }, (_, i) => String(i + 1)); // 1..12
+          return {
+            subLabel: 'Hit the Answer',
+            prompt: `${dividend} ÷ ${divisor} = ?`,
+            correct: String(quotient),
+            pool
+          };
+        } else {
+          // Hit the Question mode: Target is quotient, buttons are division expressions
+          const correctExpr = `${dividend} ÷ ${divisor}`;
+          const exprSet = new Set([correctExpr]);
+          while (exprSet.size < BUTTON_COUNT) {
+            const d = divList[randInt(0, divList.length - 1)];
+            const q = randInt(1, 12);
+            if (q !== quotient) {
+              exprSet.add(`${d * q} ÷ ${d}`);
+            }
+          }
+          return {
+            subLabel: 'Hit the Matching Division',
+            prompt: `${quotient}`,
+            correct: correctExpr,
+            pool: Array.from(exprSet)
+          };
+        }
+      }
+
+      // 6. SQUARE NUMBERS & SQUARE ROOTS
+      if (category === 'squares') {
+        if (submode === 'sq_10') {
+          const n = randInt(1, 10);
+          const ans = n * n;
+          const set = new Set([1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 20, 50]);
+          return {
+            subLabel: 'Square Number',
+            prompt: `${n}² = ?`,
+            correct: String(ans),
+            pool: Array.from(set).map(String)
+          };
+        }
+        if (submode === 'sq_12') {
+          const n = randInt(1, 12);
+          const ans = n * n;
+          const pool = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144].map(String);
+          return {
+            subLabel: 'Square Number',
+            prompt: `${n}² = ?`,
+            correct: String(ans),
+            pool
+          };
+        }
+        if (submode === 'sqrt_144') {
+          const n = randInt(1, 12);
+          const sq = n * n;
+          const pool = Array.from({ length: 12 }, (_, i) => String(i + 1));
+          return {
+            subLabel: 'Square Root',
+            prompt: `√${sq} = ?`,
+            correct: String(n),
+            pool
+          };
+        }
+      }
+
+      return { subLabel: 'Make 10', prompt: '5 + ? = 10', correct: '5', pool: ['1','2','3','4','5','6','7','8','9','10','11','0'] };
+    }
+
+    function getTableNumbers(submodeId) {
+      if (submodeId.endsWith('mix_2_5_10')) return [2, 5, 10];
+      if (submodeId.endsWith('mix_3_4_8')) return [3, 4, 8];
+      if (submodeId.endsWith('mix_all')) return [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+      const num = parseInt(submodeId.replace(/^[xd]/, ''), 10);
+      return isNaN(num) ? [2] : [num];
+    }
+
+    /**
+     * ============================================================================
+     * GAME ROUND ENGINE & BOARD RENDERING
+     * ============================================================================
+     */
+    function startRound() {
+      if (state.timerInterval) clearInterval(state.timerInterval);
+
+      state.score = 0;
+      state.totalClicks = 0;
+      state.streak = 0;
+      state.bestStreak = 0;
+      state.timeLeft = 60;
+      state.elapsedSeconds = 0;
+      state.mistakes = [];
+      state.lastPromptKey = '';
+      state.transitioning = false;
+
+      const cat = CATEGORIES[state.category];
+      const sub = cat.submodes.find(s => s.id === state.submode);
+      document.getElementById('activeModeBadge').textContent = `${cat.title} • ${sub ? sub.label : ''}`;
+      document.getElementById('activeStyleBadge').textContent =
+        state.questionStyle === 'question' ? 'Hit the Question' : 'Hit the Answer';
+      document.getElementById('activePbBadge').textContent = loadPersonalBest();
+
+      const timerPill = document.getElementById('hudTimerPill');
+      timerPill.classList.remove('timer-urgent');
+
+      switchView('game');
+      updateHud();
+      loadNextQuestion();
+      startTimer();
+      playSound('click');
+    }
+
+    function startTimer() {
+      const progressFill = document.getElementById('topProgressFill');
+      const timerPill = document.getElementById('hudTimerPill');
+
+      if (state.durationMode === 'timed') {
+        document.getElementById('hudTimerIcon').textContent = '⏱️';
+        document.getElementById('hudTimerVal').textContent = '60s';
+        progressFill.style.width = '100%';
+
+        state.timerInterval = setInterval(() => {
+          state.timeLeft -= 1;
+          document.getElementById('hudTimerVal').textContent = `${state.timeLeft}s`;
+          progressFill.style.width = `${Math.max(0, (state.timeLeft / 60) * 100)}%`;
+
+          if (state.timeLeft <= 10 && state.timeLeft > 0) {
+            timerPill.classList.add('timer-urgent');
+            playSound('tick');
+          }
+
+          if (state.timeLeft <= 0) {
+            endRound();
+          }
+        }, 1000);
+      } else {
+        document.getElementById('hudTimerIcon').textContent = '🎯';
+        document.getElementById('hudTimerVal').textContent = '0 / 20';
+        progressFill.style.width = '0%';
+
+        state.timerInterval = setInterval(() => {
+          state.elapsedSeconds += 1;
+        }, 1000);
+      }
+    }
+
+    function loadNextQuestion() {
+      state.transitioning = false;
+      let q = generateQuestionData();
+
+      // Prevent back-to-back identical prompts
+      let safety = 0;
+      while (q.prompt === state.lastPromptKey && safety < 8) {
+        q = generateQuestionData();
+        safety++;
+      }
+
+      state.lastPromptKey = q.prompt;
+      state.currentPrompt = q.prompt;
+      state.currentSubLabel = q.subLabel;
+      state.correctAnswer = q.correct;
+
+      // Shuffle 12 options cleanly
+      const shuffled = [...q.pool].slice(0, BUTTON_COUNT).sort(() => Math.random() - 0.5);
+      state.boardOptions = shuffled;
+
+      // Update Prompt Card with crisp pop animation
+      document.getElementById('targetSubLabel').textContent = q.subLabel;
+      const promptEl = document.getElementById('targetPromptDisplay');
+      promptEl.classList.remove('animate-target-pop');
+      void promptEl.offsetWidth;
+      promptEl.classList.add('animate-target-pop');
+      promptEl.textContent = q.prompt;
+
+      renderButtonsGrid();
+    }
+
+    function renderButtonsGrid() {
+      const grid = document.getElementById('buttonsBoardGrid');
+      grid.innerHTML = '';
+
+      const isExprMode = state.questionStyle === 'question';
+
+      state.boardOptions.forEach((optText, idx) => {
+        const themeIdx = idx % 6;
+        const btn = document.createElement('button');
+        btn.id = `htb-btn-${idx}`;
+        btn.className = `htb-btn btn-theme-${themeIdx} w-full ${
+          isExprMode
+            ? 'h-16 sm:h-20 text-lg sm:text-2xl px-2'
+            : 'h-16 sm:h-20 md:h-22 text-2xl sm:text-3xl'
+        }`;
+
+        btn.innerHTML = `
+          <span class="relative z-10 pointer-events-none">${optText}</span>
+          <span class="hidden lg:flex absolute bottom-1.5 right-3 text-[10px] font-black opacity-55 pointer-events-none">${KEYBOARD_MAP[idx]}</span>
+        `;
+
+        btn.onclick = (e) => handleButtonHit(idx, e);
+        grid.appendChild(btn);
+      });
+    }
+
+    function spawnFloatingPlusOne(btnEl) {
+      const rect = btnEl.getBoundingClientRect();
+      const badge = document.createElement('div');
+      badge.className = 'floating-score font-display text-2xl font-bold text-emerald-600 drop-shadow-xs';
+      badge.style.left = `${rect.left + rect.width / 2}px`;
+      badge.style.top = `${rect.top}px`;
+      badge.textContent = state.streak >= 5 ? '+1 🔥' : '+1';
+      document.body.appendChild(badge);
+      setTimeout(() => badge.remove(), 700);
+    }
+
+    function handleButtonHit(btnIdx, event = null) {
+      if (state.view !== 'game' || state.transitioning) return;
+
+      const chosen = state.boardOptions[btnIdx];
+      const btnEl = document.getElementById(`htb-btn-${btnIdx}`);
+      if (!btnEl) return;
+
+      state.totalClicks += 1;
+
+      if (chosen === state.correctAnswer) {
+        state.transitioning = true;
+        state.score += 1;
+        state.streak += 1;
+        if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+
+        btnEl.classList.add('animate-hit-correct');
+        spawnFloatingPlusOne(btnEl);
+        playSound('correct');
+        updateHud();
+
+        if (state.durationMode === 'untimed' && state.score >= 20) {
+          setTimeout(() => endRound(), 260);
+        } else {
+          setTimeout(() => loadNextQuestion(), 190);
+        }
+      } else {
+        // Incorrect hit: gentle shake, reset streak, log mistake, allow retry
+        state.streak = 0;
+        updateHud();
+        playSound('wrong');
+
+        btnEl.classList.remove('animate-hit-wrong');
+        void btnEl.offsetWidth;
+        btnEl.classList.add('animate-hit-wrong');
+
+        // Record unique mistake for this prompt
+        const alreadyLogged = state.mistakes.some(m => m.prompt === state.currentPrompt);
+        if (!alreadyLogged) {
+          state.mistakes.push({
+            prompt: state.currentPrompt,
+            wrongPick: chosen,
+            correctAnswer: state.correctAnswer
+          });
+        }
+      }
+    }
+
+    function updateHud() {
+      document.getElementById('hudScoreVal').textContent = state.score;
+      document.getElementById('hudStreakVal').textContent = state.streak;
+
+      const comboBadge = document.getElementById('hudComboBadge');
+      if (state.streak >= 10) {
+        comboBadge.textContent = '10x 🔥';
+        comboBadge.classList.remove('hidden');
+      } else if (state.streak >= 5) {
+        comboBadge.textContent = '5x Combo!';
+        comboBadge.classList.remove('hidden');
+      } else if (state.streak >= 3) {
+        comboBadge.textContent = '3x Streak!';
+        comboBadge.classList.remove('hidden');
+      } else {
+        comboBadge.classList.add('hidden');
+      }
+
+      if (state.durationMode === 'untimed') {
+        document.getElementById('hudTimerVal').textContent = `${state.score} / 20`;
+        document.getElementById('topProgressFill').style.width = `${(state.score / 20) * 100}%`;
+      }
+    }
+
+    function endRound() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+
+      playSound('fanfare');
+
+      const isNewPb = savePersonalBest(state.score);
+      const pb = loadPersonalBest();
+      const accuracy = state.totalClicks > 0 ? Math.round((state.score / state.totalClicks) * 100) : 100;
+      const minutes = state.durationMode === 'timed' ? 1 : Math.max(state.elapsedSeconds / 60, 0.05);
+      const qpm = Math.round(state.score / minutes);
+
+      const cat = CATEGORIES[state.category];
+      const sub = cat.submodes.find(s => s.id === state.submode);
+
+      document.getElementById('resNewRecordBanner').classList.toggle('hidden', !isNewPb || state.score === 0);
+      document.getElementById('resModeSummary').textContent = `${cat.title} • ${sub ? sub.label : ''} (${
+        state.questionStyle === 'question' ? 'Hit the Question' : 'Hit the Answer'
+      })`;
+      document.getElementById('resScore').textContent = state.score;
+      document.getElementById('resAccuracy').textContent = `${accuracy}%`;
+      document.getElementById('resStreak').textContent = `${state.bestStreak} 🔥`;
+      document.getElementById('resPersonalBest').textContent = `${pb} 🏆`;
+      document.getElementById('resQpm').textContent = qpm;
+
+      // Populate expandable Review Mistakes section
+      const mWrap = document.getElementById('mistakesWrapper');
+      const mList = document.getElementById('mistakesListContainer');
+      mList.innerHTML = '';
+      mList.classList.add('hidden');
+      mList.classList.remove('flex');
+      document.getElementById('mistakesChevron').textContent = '▼';
+
+      if (state.mistakes.length > 0) {
+        mWrap.classList.remove('hidden');
+        mWrap.classList.add('flex');
+        document.getElementById('mistakesToggleLabel').textContent = `Review Mistakes (${state.mistakes.length})`;
+
+        state.mistakes.forEach(m => {
+          const row = document.createElement('div');
+          row.className = 'p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 text-xs sm:text-sm';
+          row.innerHTML = `
+            <div>
+              <span class="font-display font-bold text-slate-800 text-base">${m.prompt}</span>
+              <span class="ml-2 text-xs font-bold text-rose-600">(You hit: ${m.wrongPick})</span>
+            </div>
+            <span class="px-3 py-1 rounded-lg bg-emerald-600 text-white font-extrabold">
+              Answer: ${m.correctAnswer}
+            </span>
+          `;
+          mList.appendChild(row);
+        });
+      } else {
+        mWrap.classList.add('hidden');
+        mWrap.classList.remove('flex');
+      }
+
+      switchView('results');
+    }
+
+    function toggleMistakesList() {
+      const list = document.getElementById('mistakesListContainer');
+      const chev = document.getElementById('mistakesChevron');
+      const isHidden = list.classList.contains('hidden');
+      list.classList.toggle('hidden', !isHidden);
+      list.classList.toggle('flex', isHidden);
+      chev.textContent = isHidden ? '▲' : '▼';
+    }
+
+    /**
+     * ============================================================================
+     * KEYBOARD SHORTCUTS (1-9, 0, -, = map directly to the 12 buttons)
+     * ============================================================================
+     */
+    window.addEventListener('keydown', (e) => {
+      if (state.view !== 'game') return;
+      const idx = KEYBOARD_MAP.indexOf(e.key);
+      if (idx !== -1 && idx < state.boardOptions.length) {
+        e.preventDefault();
+        handleButtonHit(idx);
+      }
+    });
+  </script>
+</body>
+</html>
